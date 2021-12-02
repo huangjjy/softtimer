@@ -1,26 +1,26 @@
 /*
  * stimer.c
  *
- *  Created on: 2021Äê12ÔÂ1ÈÕ
+ *  Created on: 2021å¹´12æœˆ1æ—¥
  *      Author: hello
  */
 
 #include <stdio.h>
 #include "stimer.h"
 
-volatile static uint32_t _stimer_ticks = 0;  ///< ¶¨Ê±Æ÷¼ÆÊıÊ±»ù
+volatile static uint32_t _stimer_ticks = 0;  ///< å®šæ—¶å™¨è®¡æ•°æ—¶åŸº
 
-static stimer_t* _stimer_list = NULL;        ///< ¶¨Ê±Æ÷ÁĞ±í
+static stimer_t* _stimer_list = NULL;        ///< å®šæ—¶å™¨åˆ—è¡¨
 
 /**
- * ¶¨Ê±Æ÷¾ä±ú
- * @param  timer            ¶¨Ê±Æ÷¾ä±ú
- * @param  name             ¶¨Ê±Æ÷Ãû³Æ
- * @param  timeout_callback ¶¨Ê±Æ÷¶¨Ê±µ½´ï»Øµ÷º¯Êı
- * @param  arg              ´«Èë¶¨Ê±Æ÷µÄ²ÎÊı
- * @param  ticks            ¶¨Ê±Æ÷³¬Ê±Ê±¼ä£¬ticksµÄµ¥Î»È¡¾öÓÚÊ±»ùº¯Êıstimer_ticksµÄµ÷ÓÃ¼ä¸ôÊ±¼ä£¬Èç¹ûstimer_ticksÃ¿1msµ÷ÓÃÒ»´Î£¬ÄÇÃ´ticksµ¥Î»¾ÍÎª1ms
- * @param  opt              ¶¨Ê±Æ÷ÊôĞÔ£¬=STIMER_OPT_SINGLE£ºµ¥´Î¶¨Ê±Æ÷  =STIMER_OPT_REPEAT£ºÖÜÆÚ¶¨Ê±Æ÷
- * @return                  =0£º³É¹¦  =other£ºÊ§°Ü
+ * å®šæ—¶å™¨å¥æŸ„
+ * @param  timer            å®šæ—¶å™¨å¥æŸ„
+ * @param  name             å®šæ—¶å™¨åç§°
+ * @param  timeout_callback å®šæ—¶å™¨å®šæ—¶åˆ°è¾¾å›è°ƒå‡½æ•°
+ * @param  arg              ä¼ å…¥å®šæ—¶å™¨çš„å‚æ•°
+ * @param  ticks            å®šæ—¶å™¨è¶…æ—¶æ—¶é—´ï¼Œticksçš„å•ä½å–å†³äºæ—¶åŸºå‡½æ•°stimer_ticksçš„è°ƒç”¨é—´éš”æ—¶é—´ï¼Œå¦‚æœstimer_ticksæ¯1msè°ƒç”¨ä¸€æ¬¡ï¼Œé‚£ä¹ˆtickså•ä½å°±ä¸º1ms
+ * @param  opt              å®šæ—¶å™¨å±æ€§ï¼Œ=STIMER_OPT_SINGLEï¼šå•æ¬¡å®šæ—¶å™¨  =STIMER_OPT_REPEATï¼šå‘¨æœŸå®šæ—¶å™¨
+ * @return                  =0ï¼šæˆåŠŸ  =otherï¼šå¤±è´¥
  */
 int stimer_init(stimer_t* timer, const char* name, void (*timeout_callback)(void* arg), void* arg, uint32_t ticks, int opt)
 {
@@ -35,41 +35,33 @@ int stimer_init(stimer_t* timer, const char* name, void (*timeout_callback)(void
 }
 
 /**
- * Æô¶¯¶¨Ê±Æ÷
- * @param  timer ¶¨Ê±Æ÷¾ä±ú
- * @return       =0£º³É¹¦  <0£º¶¨Ê±Æ÷²»´æÔÚ
+ * å¯åŠ¨å®šæ—¶å™¨
+ * @param  timer å®šæ—¶å™¨å¥æŸ„
+ * @return       =0ï¼šæˆåŠŸ  <0ï¼šå®šæ—¶å™¨ä¸å­˜åœ¨
  */
 int stimer_start(stimer_t* timer)
 {
 	stimer_t* it = _stimer_list;
-
 	while (it != NULL)
 	{
-		if (it == timer)
-		{
-			return -1;
-		}
+		if (it == timer)    return -1;
 		it = it->next;
 	}
-
 	timer->next = _stimer_list;
 	_stimer_list = timer;
-
 	timer->current_ticks = _stimer_ticks;
-
 	return 0;
 }
 
 /**
- * Í£Ö¹¶¨Ê±Æ÷
- * @param  timer ¶¨Ê±Æ÷¾ä±ú
- * @return       =0£º³É¹¦  <0£º¶¨Ê±Æ÷²»´æÔÚ
+ * åœæ­¢å®šæ—¶å™¨
+ * @param  timer å®šæ—¶å™¨å¥æŸ„
+ * @return       =0ï¼šæˆåŠŸ  <0ï¼šå®šæ—¶å™¨ä¸å­˜åœ¨
  */
 int stimer_stop(stimer_t* timer)
 {
 	stimer_t** it = &_stimer_list;
 	stimer_t* entry = NULL;
-
 	while (*it != NULL)
 	{
 		entry = *it;
@@ -80,15 +72,14 @@ int stimer_stop(stimer_t* timer)
 		}
 		it = &entry->next;
 	}
-
 	return -1;
 }
 
 
 /**
- * ÖØÆô¶¨Ê±Æ÷
- * @param  timer ¶¨Ê±Æ÷¾ä±ú
- * @return       =0£º³É¹¦  <0£º¶¨Ê±Æ÷²»´æÔÚ
+ * é‡å¯å®šæ—¶å™¨
+ * @param  timer å®šæ—¶å™¨å¥æŸ„
+ * @return       =0ï¼šæˆåŠŸ  <0ï¼šå®šæ—¶å™¨ä¸å­˜åœ¨
  */
 int stimer_restart(stimer_t* timer)
 {
@@ -97,7 +88,7 @@ int stimer_restart(stimer_t* timer)
 	{
 		if (entry == timer)
 		{
-			entry->current_ticks = _stimer_ticks;  // ÖØĞÂ¿ªÊ¼¼ÆÊ±
+			entry->current_ticks = _stimer_ticks;  // é‡æ–°å¼€å§‹è®¡æ—¶
 			return 0;
 		}
 		entry = entry->next;
@@ -106,9 +97,9 @@ int stimer_restart(stimer_t* timer)
 }
 
 /**
- * »ñÈ¡µ±Ç°¶¨Ê±Æ÷ÒÑ¶¨Ê±Ê±¼ä
- * @param  timer ¶¨Ê±Æ÷¾ä±ú
- * @return       µ±Ç°¶¨Ê±Ê±¼ä
+ * è·å–å½“å‰å®šæ—¶å™¨å·²å®šæ—¶æ—¶é—´
+ * @param  timer å®šæ—¶å™¨å¥æŸ„
+ * @return       å½“å‰å®šæ—¶æ—¶é—´
  */
 uint32_t stimer_getticks(const stimer_t* timer)
 {
@@ -117,19 +108,13 @@ uint32_t stimer_getticks(const stimer_t* timer)
 	return (uint32_t)tmp;
 }
 
-/// ¶¨Ê±Æ÷ÂÖÑµº¯Êı£¬·ÅÖÃÓÚmainº¯ÊıµÄwhileËÀÑ­»·ÖĞ
+/// å®šæ—¶å™¨è½®è®­å‡½æ•°ï¼Œæ”¾ç½®äºmainå‡½æ•°çš„whileæ­»å¾ªç¯ä¸­
 void stimer_poll(void)
 {
-	int tmp;
 	stimer_t* entry = _stimer_list;
 	while (entry != NULL)
 	{
-		tmp = _stimer_ticks - entry->current_ticks;
-		if (tmp < 0) // Ğ¡ÓÚÁãµÄÊ±ºò¾ÍÊÇ·¢ÉúÁËuint32_tÊıÖµÒç³öÎÊÌâ
-		{
-			tmp += UINT32_MAX;
-		}
-		if (tmp >= entry->timeout_ticks)
+		if (((int)(_stimer_ticks - entry->current_ticks)) >= entry->timeout_ticks)
 		{
 			if (entry->opt == STIMER_OPT_SINGLE)
 			{
@@ -142,7 +127,7 @@ void stimer_poll(void)
 	}
 }
 
-/// ¶¨Ê±Æ÷Ê±»ùº¯Êı
+/// å®šæ—¶å™¨æ—¶åŸºå‡½æ•°
 void stimer_ticks(void)
 {
 	_stimer_ticks++;
@@ -150,7 +135,7 @@ void stimer_ticks(void)
 
 ////////////////////////////////////////////////////////////////////////////
 ///
-///                  Ê¾Àı³ÌĞò
+///                  ç¤ºä¾‹ç¨‹åº
 ///
 
 #if 0
@@ -167,30 +152,30 @@ void UARTTimerCallback(void* arg)
 {
 	stimer_t* timer = (stimer_t*)arg;
 	printf("!!! timer name:%s !!!\r\n", __FUNCTION__);
-	stimer_start(timer);  // ÔÙ´ÎÆô¶¯¶¨Ê±Æ÷
+	stimer_start(timer);  // å†æ¬¡å¯åŠ¨å®šæ—¶å™¨
 }
 
 int main()
 {
 	stimer_init(
-	    &LED0Timer,                             // ¶¨Ê±Æ÷¾ä±ú
-	    "LED0Timer",                            // ¶¨Ê±Æ÷Ãû³Æ
-	    LED0TimerCallback,                      // ¶¨Ê±Æ÷Òç³ö»Øµ÷º¯Êı
-	    &LED0Timer,                             // ²ÎÊı
-	    500,                                    // ¶¨Ê±ÖÜÆÚ
-	    STIMER_OPT_REPEAT                       // ÖÜÆÚÄ£Ê½
+	    &LED0Timer,                             // å®šæ—¶å™¨å¥æŸ„
+	    "LED0Timer",                            // å®šæ—¶å™¨åç§°
+	    LED0TimerCallback,                      // å®šæ—¶å™¨æº¢å‡ºå›è°ƒå‡½æ•°
+	    &LED0Timer,                             // å‚æ•°
+	    500,                                    // å®šæ—¶å‘¨æœŸ
+	    STIMER_OPT_REPEAT                       // å‘¨æœŸæ¨¡å¼
 	);
-	stimer_start(&LED0Timer);                   // Æô¶¯¶¨Ê±Æ÷
+	stimer_start(&LED0Timer);                   // å¯åŠ¨å®šæ—¶å™¨
 
 	stimer_init(
-	    &UARTTimer,                             // ¶¨Ê±Æ÷¾ä±ú
-	    "UARTTimer",                            // ¶¨Ê±Æ÷Ãû³Æ
-	    UARTTimerCallback,                      // ¶¨Ê±Æ÷Òç³ö»Øµ÷º¯Êı
-	    &UARTTimer,                             // ²ÎÊı
-	    1000,                                   // ¶¨Ê±ÖÜÆÚ
-	    STIMER_OPT_SINGLE                       // µ¥´ÎÄ£Ê½
+	    &UARTTimer,                             // å®šæ—¶å™¨å¥æŸ„
+	    "UARTTimer",                            // å®šæ—¶å™¨åç§°
+	    UARTTimerCallback,                      // å®šæ—¶å™¨æº¢å‡ºå›è°ƒå‡½æ•°
+	    &UARTTimer,                             // å‚æ•°
+	    1000,                                   // å®šæ—¶å‘¨æœŸ
+	    STIMER_OPT_SINGLE                       // å•æ¬¡æ¨¡å¼
 	);
-	stimer_start(&UARTTimer);                   // Æô¶¯¶¨Ê±Æ÷
+	stimer_start(&UARTTimer);                   // å¯åŠ¨å®šæ—¶å™¨
 
 	for (;;)
 	{
